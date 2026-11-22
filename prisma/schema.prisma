@@ -1,0 +1,184 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Roles/statuses disimpan sebagai String dan divalidasi di app code.
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  role      String   @default("CUSTOMER")
+  phone     String?
+  address   String?
+  city      String?
+  baseSalary Float?  @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  orders    Order[]
+  suppliedProducts Product[] @relation("SupplierProducts")
+  suppliedMaterials RawMaterial[] @relation("SupplierMaterials")
+  stockEntries StockEntry[]
+  payrolls  Payroll[]
+  reviews   Review[]
+}
+
+model Product {
+  id            Int         @id @default(autoincrement())
+  name          String
+  slug          String?     @unique
+  category      String      @default("Tahu Goreng")
+  price         Int
+  originalPrice Int?
+  stock         Int         @default(50)
+  soldCount     Int         @default(0)
+  rating        Float       @default(4.9)
+  reviewCount   Int         @default(28)
+  description   String?
+  image         String?
+  badge         String?
+  isFlashSale   Boolean     @default(false)
+  isPopular     Boolean     @default(false)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  orderItems    OrderItem[]
+  supplierId    Int?
+  supplier      User?       @relation("SupplierProducts", fields: [supplierId], references: [id])
+  reviews       Review[]
+}
+
+model Order {
+  id             Int      @id @default(autoincrement())
+  orderNumber    String   @unique
+  userId         Int?
+  user           User?    @relation(fields: [userId], references: [id])
+  customerName   String
+  customerPhone  String
+  customerEmail  String?
+  address        String
+  city           String
+  postalCode     String?
+  notes          String?
+  shippingMethod String
+  shippingCost   Int      @default(0)
+  paymentMethod  String   @default("COD")
+  paymentStatus  String   @default("PENDING")
+  paymentRef     String?
+  vaNumber       String?
+  qrisPayload    String?
+  paymentProofUrl String?
+  paidAt         DateTime?
+  expiresAt      DateTime?
+  subtotal       Int
+  discount       Int      @default(0)
+  totalAmount    Int
+  status         String   @default("PENDING")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  items          OrderItem[]
+}
+
+model OrderItem {
+  id        Int     @id @default(autoincrement())
+  orderId   Int
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId Int
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+  price     Int
+  variant   String?
+}
+
+model Expense {
+  id          Int      @id @default(autoincrement())
+  amount      Int
+  category    String   @default("Operasional")
+  description String?
+  date        DateTime @default(now())
+  createdAt   DateTime @default(now())
+}
+
+model RawMaterial {
+  id          Int      @id @default(autoincrement())
+  name        String
+  sku         String?  @unique
+  category    String   @default("Bahan Baku")
+  unit        String   @default("kg")
+  stock       Float    @default(0)
+  unitCost    Int      @default(0)
+  supplierId  Int?
+  supplier    User?    @relation("SupplierMaterials", fields: [supplierId], references: [id])
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  entries     StockEntry[]
+}
+
+model StockEntry {
+  id            Int         @id @default(autoincrement())
+  materialId    Int
+  material      RawMaterial @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  quantity      Float
+  unitCost      Int
+  totalCost     Int
+  supplierId    Int?
+  supplier      User?       @relation(fields: [supplierId], references: [id])
+  note          String?
+  date          DateTime    @default(now())
+  createdAt     DateTime    @default(now())
+}
+
+model Employee {
+  id        String   @id @default(cuid())
+  name      String
+  position  String
+  baseSalary Float
+  phone     String?
+  createdAt DateTime @default(now())
+  payrolls  Payroll[]
+}
+
+model Payroll {
+  id         String   @id @default(cuid())
+  employeeId String?  @unique
+  employee   Employee? @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  userId     Int?
+  user       User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount     Float
+  month      String
+  status     String   @default("PAID")
+  paidAt     DateTime @default(now())
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, month])
+  @@unique([employeeId, month])
+}
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  role      String
+  action    String
+  message   String
+  createdAt DateTime @default(now())
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  productId Int
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  userId    Int?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([productId, userId])
+  @@index([productId])
+}
