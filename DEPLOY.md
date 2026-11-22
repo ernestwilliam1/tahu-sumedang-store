@@ -16,14 +16,17 @@ postgresql://postgres.xxxx:password@aws-0-ap-southeast-1.pooler.supabase.com:654
 Setelah URL didapat, dorong skema:
 
 ```bash
-npx prisma db push
+npx.cmd prisma db push
 ```
 
 Seed data demo (opsional, sekali saja):
 
 ```bash
-npm run db:seed   # atau: npx prisma db seed
+npm run db:seed   # atau: npx.cmd prisma db seed
 ```
+
+> [!IMPORTANT]
+> `DATABASE_URL` di Vercel pakai **Connection pooling** (port `6543`). Untuk `prisma db push` dan seed dari terminal, pakai **Direct connection** (port `5432`) — migrations/seed tidak boleh lewat pooler. Seed butuh Node 24 (`node --experimental-strip-types`).
 
 ## 2. Storage bukti transfer
 
