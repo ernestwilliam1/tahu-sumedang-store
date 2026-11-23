@@ -2,21 +2,51 @@
 
 Warm Artisanal Light Theme e-commerce & ERP ringan untuk **Tahu Sumedang** (tahu goreng autentik Jawa Barat).
 
-**Stack:** Next.js 16 (App Router, Turbopack) · Prisma 5.22 + SQLite · Tailwind CSS 4 · Framer Motion · GSAP · jose JWT
+**Stack:** Next.js 16 (App Router, Turbopack) · Prisma 5.22 + PostgreSQL (Supabase) · Supabase Storage · Tailwind CSS 4 · Framer Motion · GSAP · jose JWT
 
 ---
 
-## Run locally
+## ⚡ Quick Links
 
+- **🚀 [START HERE](./START_HERE.md)** - Panduan setup pertama untuk pemula
+- **📋 [Quick Start Guide](./QUICK_START.md)** - Setup dalam 10 menit
+- **📚 [Dokumentasi Lengkap](./SUPABASE_SETUP.md)** - Detail A-Z
+- **✅ [Deployment Checklist](./DEPLOYMENT_CHECKLIST.md)** - Checklist deploy
+- **🔧 [Troubleshooting](./docs/TROUBLESHOOTING.md)** - Solusi error umum
+
+---
+
+## 🚀 Quick Start
+
+### 1. Install Dependencies
 ```bash
 npm install
-npx prisma db push        # create SQLite at prisma/dev.db
-npx prisma generate       # regenerasi client (wajib setelah pull schema baru)
-npx tsx prisma/seed.ts    # 8 produk + 11 users + ~870 orders + expenses
+```
+
+### 2. Setup Supabase & Environment
+1. Buat project di [Supabase](https://supabase.com)
+2. Copy `.env.example` ke `.env`
+3. Isi credentials Supabase (lihat [panduan lengkap](./docs/SUPABASE_CREDENTIALS.md))
+4. Generate secrets:
+```bash
+npm run generate:secrets
+```
+
+### 3. Setup Database
+```bash
+npx prisma db push        # Push schema ke Supabase
+npm run db:seed           # Seed data awal
+```
+
+### 4. Run Development
+```bash
 npm run dev               # http://localhost:3000
 ```
 
 **Akun seed:** `owner@tahu.id / owner123`, `admin@tahu.id / admin123`, `finance@tahu.id / finance123`, `supplier@tahu.id / supplier123`, customer `customer@tahu.id / customer123`.
+
+### 5. Deploy ke Vercel
+Ikuti panduan: [QUICK_START.md](./QUICK_START.md) atau [DEPLOYMENT_CHECKLIST.md](./DEPLOYMENT_CHECKLIST.md)
 
 ---
 
